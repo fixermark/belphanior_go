@@ -13,17 +13,17 @@ import (
 )
 
 type matchHandler struct {
-	name string
-	method string
+	name       string
+	method     string
 	pathRegexp *regexp.Regexp
 	dataRegexp *regexp.Regexp
-	handler reflect.Value
+	handler    reflect.Value
 }
 
 // Handler for incoming messages. Servant can be accessed via CallHandler, which
 // will either match a request to a relevant registered Handler or yield a 404.
 type Servant struct {
-	role RoleImplementation
+	role     RoleImplementation
 	handlers []matchHandler
 }
 
@@ -33,10 +33,11 @@ func (s *Servant) SetRoleUrl(url string) {
 
 // Adds the handler to the set of registered handlers and serves it
 func (s *Servant) RegisterHandler(description Handler) {
+	// TODO(mtomczak): this doesn't yet support ?arg=$(arg) format
 	s.role.Handlers = append(s.role.Handlers, description)
 	mh := matchHandler{
-		name: description.Name,
-		method: description.Method,
+		name:    description.Name,
+		method:  description.Method,
 		handler: reflect.ValueOf(description.Handler),
 	}
 	mh.pathRegexp = substitutionToRegexp(description.Path)
@@ -48,9 +49,7 @@ func (s *Servant) RegisterHandler(description Handler) {
 }
 
 func (s *Servant) ReportRoles(w http.ResponseWriter, r *http.Request) {
-	var protocol struct {
-		Roles []RoleImplementation `json:"roles"`
-	}
+	var protocol Protocol
 	protocol.Roles = append(protocol.Roles, s.role)
 
 	encoded, err := json.Marshal(protocol)
@@ -69,7 +68,7 @@ func (s *Servant) ReportRoles(w http.ResponseWriter, r *http.Request) {
 func (s *Servant) CallHandler(w http.ResponseWriter, r *http.Request) {
 	path := r.URL.Path
 	var data string
-	if (r.Body != nil) {
+	if r.Body != nil {
 		bs, err := ioutil.ReadAll(r.Body)
 		if err != nil {
 			reportError(w, err)
@@ -120,7 +119,7 @@ func runHandler(
 	inputValues := make(
 		[]reflect.Value,
 		0,
-		len(pathMatches) + len(dataMatches))
+		len(pathMatches)+len(dataMatches))
 	for _, value := range pathMatches {
 		inputValues = append(inputValues, reflect.ValueOf(value))
 	}
@@ -130,7 +129,7 @@ func runHandler(
 	result := handler.handler.Call(inputValues)
 	switch len(result) {
 	case 0:
-		io.WriteString(w,"")
+		io.WriteString(w, "")
 	case 1:
 		io.WriteString(w, result[0].String())
 	default:
@@ -169,10 +168,9 @@ func (s *Servant) Run() {
 		"The port the servant should listen on.")
 	flag.Parse()
 
-	// TODO(mtomczak): Role reporting.
 	http.HandleFunc("/protocol", s.ReportRoles)
 	http.HandleFunc("/", s.CallHandler)
 
 	fmt.Printf("Servant is listening on port %d\n", *portFlag)
-	http.ListenAndServe(":" + strconv.Itoa(*portFlag), nil)
+	http.ListenAndServe(":"+strconv.Itoa(*portFlag), nil)
 }

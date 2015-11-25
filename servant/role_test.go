@@ -11,15 +11,15 @@ func TestRoleImplementationJson(t *testing.T) {
 		RoleUrl: "http://example.com/role",
 		Handlers: []Handler{
 			Handler{
-				Name: "test 1",
+				Name:   "test 1",
 				Method: "GET",
-				Path: "/test1/$(arg 1)",
+				Path:   "/test1/$(arg 1)",
 			},
 			Handler{
-				Name: "test 2",
+				Name:   "test 2",
 				Method: "POST",
-				Path: "test2/$(arg 1)",
-				Data: "$(arg 2)",
+				Path:   "test2/$(arg 1)",
+				Data:   "$(arg 2)",
 			},
 		},
 	}

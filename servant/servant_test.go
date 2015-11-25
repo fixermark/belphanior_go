@@ -11,17 +11,17 @@ func TestRoleReport(t *testing.T) {
 	s := Servant{}
 	s.SetRoleUrl("https://example.com/foo")
 	s.RegisterHandler(Handler{
-		Name: "test 1",
-		Method: "GET",
-		Path: "/test1/$(arg 1)",
-		Handler: func() { },
+		Name:    "test 1",
+		Method:  "GET",
+		Path:    "/test1/$(arg 1)",
+		Handler: func() {},
 	})
 	s.RegisterHandler(Handler{
-		Name: "test 2",
-		Method: "POST",
-		Path: "test2/$(arg 1)",
-		Data: "$(arg 2)",
-		Handler: func() { },
+		Name:    "test 2",
+		Method:  "POST",
+		Path:    "test2/$(arg 1)",
+		Data:    "$(arg 2)",
+		Handler: func() {},
 	})
 	req, err := http.NewRequest("GET", "http://example.com/protocol", nil)
 	if err != nil {
@@ -45,15 +45,14 @@ func TestRoleReport(t *testing.T) {
 	}
 }
 
-
 func TestHandlerRegistrationAndCall(t *testing.T) {
 	s := Servant{}
 	handlerInput := "unmodified"
 
 	s.RegisterHandler(Handler{
-		Name: "test 1",
+		Name:   "test 1",
 		Method: "GET",
-		Path: "/test1/$(arg 1)",
+		Path:   "/test1/$(arg 1)",
 		Handler: func(arg1 string) string {
 			handlerInput = arg1
 			return "ok"
@@ -84,9 +83,9 @@ func TestNoHandlerForMessage(t *testing.T) {
 	handlerInput := "unmodified"
 
 	s.RegisterHandler(Handler{
-		Name: "test 1",
+		Name:   "test 1",
 		Method: "GET",
-		Path: "/test1/$(arg 1)",
+		Path:   "/test1/$(arg 1)",
 		Handler: func(arg1 string) string {
 			handlerInput = arg1
 			return "ok"
@@ -112,19 +111,19 @@ func TestMultipleHandlerRegistration(t *testing.T) {
 	handlerInput := "unmodified"
 
 	s.RegisterHandler(Handler{
-		Name: "test 1",
+		Name:   "test 1",
 		Method: "GET",
-		Path: "/test1/$(arg 1)",
+		Path:   "/test1/$(arg 1)",
 		Handler: func(arg1 string) string {
 			handlerInput = arg1
 			return "ok"
 		},
 	})
 	s.RegisterHandler(Handler{
-		Name: "test 2",
+		Name:   "test 2",
 		Method: "GET",
-		Path: "/test2/$(arg 1)/$(arg 2)",
-		Handler: func(arg1, arg2  string) string {
+		Path:   "/test2/$(arg 1)/$(arg 2)",
+		Handler: func(arg1, arg2 string) string {
 			handlerInput = arg1 + arg2
 			return "ok"
 		},
@@ -154,9 +153,9 @@ func TestNoHandlerResult(t *testing.T) {
 	handlerInput := "unmodified"
 
 	s.RegisterHandler(Handler{
-		Name: "test 1",
+		Name:   "test 1",
 		Method: "GET",
-		Path: "/test1/$(arg 1)",
+		Path:   "/test1/$(arg 1)",
 		Handler: func(arg1 string) {
 			handlerInput = arg1
 		},
@@ -185,9 +184,9 @@ func TestErrorHandlerResult(t *testing.T) {
 	s := Servant{}
 
 	s.RegisterHandler(Handler{
-		Name: "test 1",
+		Name:   "test 1",
 		Method: "GET",
-		Path: "/test1/$(arg 1)",
+		Path:   "/test1/$(arg 1)",
 		Handler: func(arg1 string) (result string, err error) {
 			if arg1 == "bomb" {
 				err = errors.New("kaboom")
