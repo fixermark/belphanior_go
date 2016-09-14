@@ -25,6 +25,8 @@ type matchHandler struct {
 type Servant struct {
 	role     RoleImplementation
 	handlers []matchHandler
+	flagsAdded bool
+	portFlag *int
 }
 
 func (s *Servant) SetRoleUrl(url string) {
@@ -158,19 +160,27 @@ func substitutionToRegexp(sub string) *regexp.Regexp {
 	return regexp.MustCompile(regexpString)
 }
 
-// Runs the servant as an HTTP server using net/http.  Defines the 'port' flag,
-// which allows specification of the port the server runs on.
-
-func (s *Servant) Run() {
-	portFlag := flag.Int(
+// Adds the servant flags to the command-line flag parser.
+func (s *Servant) AddFlags() {
+	if s.flagsAdded {
+		return
+	}
+	s.flagsAdded = true
+	s.portFlag = flag.Int(
 		"port",
 		8080,
 		"The port the servant should listen on.")
+}
+
+// Runs the servant as an HTTP server using net/http.  Defines the 'port' flag,
+// which allows specification of the port the server runs on.
+func (s *Servant) Run() {
+	s.AddFlags()
 	flag.Parse()
 
 	http.HandleFunc("/protocol", s.ReportRoles)
 	http.HandleFunc("/", s.CallHandler)
 
-	fmt.Printf("Servant is listening on port %d\n", *portFlag)
-	http.ListenAndServe(":"+strconv.Itoa(*portFlag), nil)
+	fmt.Printf("Servant is listening on port %d\n", *s.portFlag)
+	http.ListenAndServe(":"+strconv.Itoa(*s.portFlag), nil)
 }
